@@ -1,0 +1,13 @@
+#stage=1
+FROM ubuntu:latest  AS build
+WORKDIR /app
+RUN apt-get update && apt-get install -y openjdk-11-jdk 
+COPY . .
+RUN javac HelloWorld.java  && echo "Main-Class: HelloWorld" > Manifest.txt
+RUN jar cvmf Manifest.txt HelloWorld.jar  *.class
+
+#stage=2
+FROM gcr.io/distroless/java11-debian11
+WORKDIR /app
+COPY --from=build /app/HelloWorld.jar .
+CMD ["HelloWorld.jar"]
